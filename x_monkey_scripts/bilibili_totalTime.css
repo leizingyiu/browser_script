@@ -1,0 +1,62 @@
+/* ==UserStyle==
+@name bilibili 选集样式
+@namespace leizingyiu.net
+@version 2022.08.28
+@description:en An user stylesheet to replace all fonts on web pages with Adobe-branded fonts, brings you a more unified and beautiful visual style.
+@description 搭配 https://greasyfork.org/zh-CN/scripts/447638 使用，优化 bilibili 选集时间显示
+@author leizingyiu <leizingyiu.net>
+@homepageURL https://www.leizingyiu.net
+@supportURL https://www.leizingyiu.net
+@license GNU AGPLv3 
+@preprocessor default
+==/UserStyle== */
+
+
+@-moz-document domain("bilibili.com") {
+
+    .multi-page .cur-list .list-box li .part {
+        display: inline-block !important;
+        overflow: unset !important;
+        text-overflow: unset !important;
+        flex-shrink: 1 !important;
+        height: auto !important;
+        white-space: break-spaces !important;
+        line-height: 1.1em !important;
+    }
+
+    .multi-page .cur-list .list-box li {
+        height: auto !important;
+    }
+
+    .multi-page .cur-list .list-box li a * {
+        place-self: flex-start !important;
+        line-height: 1.2em !important;
+        padding: 0.2em 0 !important;
+    }
+
+    .base-video-sections .video-section-list .video-episode-card__info-title {
+        overflow: unset !important;
+        white-space: normal !important;
+        padding: 0.2em 0 !important;
+    }
+
+    .base-video-sections .video-section-list .video-episode-card__info {
+        height: auto !important;
+    }
+
+    .base-video-sections .video-section-list .video-episode-card {
+        height: auto !important;
+    }
+    
+    .base-video-sections .video-section-list[style]{
+        height: auto!important;
+    }
+    .base-video-sections .video-section-list[style="height: 0px;"]{
+        height: 0!important;
+    }
+
+
+    .next-button .txt {
+        word-break: keep-all;
+    }
+}
