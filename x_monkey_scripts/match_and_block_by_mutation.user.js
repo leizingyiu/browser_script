@@ -17,9 +17,13 @@
 // ==/UserScript==
 // source file name: match_and_block_by_mutation.js
 
+// Created: "2022/7/15 00:00:00"
+// Last modified: "2023/02/09 19:31:14"
+
 /** readme.md:
 
-按照个人喜好，在【数据】中填写关键字，用中文或者英文逗号隔开，就可以根据这些关键字，把对应的图片视频内容，替换成 replacement 的🔥，或者自行填写 replacement 的内容
+按照个人喜好，在【数据】中填写关键字，用中文或者英文逗号隔开，就可以根据这些关键字，把对应的图片视频内容，替换成 replacement 的🔥，或者自行填写 replacement 的内容；
+如使用的脚本插件无【数据】一栏，请在下方 my_block_keywords 中填写。
 
 ---
 
@@ -49,6 +53,8 @@
 ---
 
 */
+
+const my_block_keywords = '蒙牛，双立人，滴露，益达，usmile，gucci，GUCCI，开小灶，隅田川，德芙，石头科技，欧扎克，心相印，陈情令，开小灶';
 
 const replacement = '🔥',
   fireSize = 1.08,
@@ -90,7 +96,7 @@ const checking_local_reagent = "___",
   default_wait_time = 5,
 
   local_keywords_key = "请填写需要屏蔽的关键字",
-  default_block_keywords = "蒙牛，双立人，滴露，益达，usmile，gucci，GUCCI，开小灶，隅田川，德芙，石头科技，欧扎克，心相印，陈情令，开小灶",
+  default_block_keywords = my_block_keywords.length > 0 ? my_block_keywords : "游戏，作弊，迟到，早退",
 
   local_selectors_key = '请填写自定义选择器',
   default_web_selectors = {
@@ -223,6 +229,7 @@ const block_keywords = GM_getValue(local_keywords_key, default_block_keywords).s
 
 let web = Object.keys(webSelectors).filter(k => window.location.host.indexOf(k) != -1);
 const fireRandomClass = `fire_${String(Math.random()).replace('.', '')}`;
+const mosaicRandomClass = `mosaic_${String(Math.random()).replace('.', '')}`;
 
 if (!document.querySelector(`#${fireRandomClass}`)) {
   let fireStyle = document.createElement('style');
@@ -269,6 +276,81 @@ if (!document.querySelector(`#${fireRandomClass}`)) {
   `;
   document.body.appendChild(fireStyle);
 }
+function fireTheHideDom(hideDom) {
+  let fire = document.createElement('i');
+  fire.innerText = replacement;
+  fire.classList.add(fireRandomClass);
+  fire.style.fontSize = Number(hideDom.clientHeight) * fireSize + 'px';
+  fire.style.lineHeight = '1em';
+  fire.setAttribute(fireChecker, true);
+
+  hideDom.classList.add(`${fireRandomClass}_parent`);
+  hideDom.style.overflow = 'hidden';
+  hideDom.style.position = 'relative';
+  hideDom.appendChild(fire);
+}
+
+if (!document.querySelector(`#${mosaicRandomClass}`)) {
+  let mosaicSvg = document.createElement('div');
+  mosaicSvg.setAttribute('id', mosaicRandomClass + '_svg');
+  mosaicSvg.innerHTML = `
+  <svg width=0 height=0 >
+    <filter id="mosaic" x="0" y="0">
+      <feFlood x="4" y="4" height="2" width="2"/>
+      <feComposite width="8" height="8"/>
+      <feTile result="a"/>
+      <feComposite in="SourceGraphic" in2="a" operator="in"/>
+      <feMorphology operator="dilate"radius="5"/>
+    </filter>
+  </svg>
+  <svg width="0" height="0">
+  <filter id="mosaicOff" x="0" y="0">
+    <feFlood x="0" y="0" height="0" width="0"></feFlood>
+    <feComposite width="1" height="1"></feComposite>
+    <feTile result="a"></feTile>
+    <feComposite in="SourceGraphic" in2="a" operator="in"></feComposite>
+    <feMorphology operator="dilate" radius="0"></feMorphology>
+  </filter>
+</svg>
+`;
+  document.body.appendChild(mosaicSvg);
+  let mosaicStyle = document.createElement('style');
+  mosaicStyle.setAttribute('id', mosaicRandomClass);
+  mosaicStyle.innerHTML = `
+  .${mosaicRandomClass}{
+    filter: url(#mosaic);
+  }
+
+  .${mosaicRandomClass}_parent *{
+    opacity:0;
+    transition:opacity  0.1s ease;
+  }
+  .${mosaicRandomClass}_parent:hover *{
+    opacity:1;
+    transition:opacity ${waitTime}s ease;
+  }
+
+  .${mosaicRandomClass}_parent  .${mosaicRandomClass}{
+    opacity:1;
+    transition:opacity 0.5s ease;
+  }
+  .${mosaicRandomClass}_parent:hover .${mosaicRandomClass}{
+    pointer-events: none;
+    opacity:0;
+    transition:opacity ${waitTime}s ease;
+  }
+
+  .${mosaicRandomClass}:hover .${mosaicRandomClass}{
+    pointer-events: none;
+    opacity:0;
+    transition:opacity ${waitTime * 2}s ease  ${waitTime * 1.5}s;
+  }
+
+  `;
+  document.body.appendChild(mosaicStyle);
+}
+
+
 
 if (Boolean(web.length)) {
   web = web[0];
@@ -276,10 +358,10 @@ if (Boolean(web.length)) {
   const selectors = webSelectors[web];
 
 
-  const style = document.createElement('style');
-  style.innerHTML = `
-  `;
-  document.body.appendChild(style);
+  // const style = document.createElement('style');
+  // style.innerHTML = `
+  // `;
+  // document.body.appendChild(style);
 
 
   const blockThem = function (target) {
@@ -346,20 +428,12 @@ if (Boolean(web.length)) {
           return w;
         }).filter(Boolean);
 
+
+
         if (matchWords.length > 0) {
           console.log(...matchWords);
           hideDoms.map(hideDom => {
-            let fire = document.createElement('i');
-            fire.innerText = replacement;
-            fire.classList.add(fireRandomClass);
-            fire.style.fontSize = Number(hideDom.clientHeight) * fireSize + 'px';
-            fire.style.lineHeight = '1em';
-            fire.setAttribute(fireChecker, true);
-
-            hideDom.classList.add(`${fireRandomClass}_parent`);
-            hideDom.style.overflow = 'hidden';
-            hideDom.style.position = 'relative';
-            hideDom.appendChild(fire);
+            fireTheHideDom(hideDom);
           });
         }
 
