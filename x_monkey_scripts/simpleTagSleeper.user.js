@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        testing - 标签休眠/tagSleeper - 标签被切换到非活动状态时减少活动
+// @name        testing - 简易标签休眠/simpleTagSleeper - 标签被切换到非活动状态时减少活动
 // @namespace   leizingyiu.net
 // @match       *://*/*
 // @grant       none
@@ -9,7 +9,7 @@
 // ==/UserScript==
 
 // Created: "2023/10/12 01:50:47"
-// Last modified: "2023/10/13 03:21:15" 
+// Last modified: "2023/10/16 00:40:39" 
 
 
 //default_settings;
@@ -80,8 +80,13 @@ function alertToPauseJs(boo = settings.popAnAlert, waitTime = settings.waitBefor
     if (document.hidden && Boolean(!alertSleeper)) {
         alertSleeper = setTimeout(function () {
             document.documentElement.classList.toggle(alertPauseClass);
+
+
+            document.removeEventListener("visibilitychange", main);
+
             let _boo = confirm('休眠中，点击确定继续播放/浏览⬇️');
             if (_boo) { videoSleep(); }
+            document.addEventListener("visibilitychange", main);
 
         }, waitTime);
     } else {
@@ -91,19 +96,23 @@ function alertToPauseJs(boo = settings.popAnAlert, waitTime = settings.waitBefor
 
     if (oldSleeper != Boolean(alertSleeper)) {
         document.documentElement.classList.toggle(alertPauseClass);
+
+        if (document.documentElement.classList.contains(alertPauseClass)) {
+            document.removeEventListener("visibilitychange", main);
+        } else {
+            document.addEventListener("visibilitychange", main);
+        }
+
         videoSleep();
     }
 }
 
-
-document.addEventListener("visibilitychange", function () {
-
-
+function main() {
     videoSleep();
 
     alertToPauseJs();
-
-});
+}
+document.addEventListener("visibilitychange", main);
 
 
 
